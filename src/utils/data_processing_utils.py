@@ -59,7 +59,6 @@ def get_tiled_data(n):
     final_images = []
     similar_pairs = []
     dis_pairs = []
-    channel_norm = calculate_channel_percentiles("Noise_rm_2", directories, files, "TIFs", 0.999)
     fov = ["TIFs"]
     three_channels = ['159_NEFH','169_Iba1','174_GFAP']
     three_channel_norm = channel_norm[['159_NEFH.tif','169_Iba1.tif','174_GFAP.tif']]
@@ -82,27 +81,28 @@ def get_tiled_data(n):
         M = 256
         N = 256
         tiles = [img_data[x:x+M,y:y+N] for x in range(0,img_data.shape[0],M) for y in range(0,img_data.shape[1],N)]
-        tile_coords = [(x,x+M,y,y+N) for x in range(0,img_data.shape[0],M) for y in range(0,img_data.shape[1],N)]
-        final_tiles = [[i+1, tile_coords[i]] for i in range(len(tiles))]
+        #tile_coords = [(x,x+M,y,y+N) for x in range(0,img_data.shape[0],M) for y in range(0,img_data.shape[1],N)]
+        #final_tiles = [[i+1, tile_coords[i]] for i in range(len(tiles))]
+        '''
         for i in range(len(tiles)):
             final_images.append([directory, i+1, tile_coords[i], tiles[i]])
-        
-        adj_mappings = get_mappings(n)
+        '''
+
+        adj_mappings = get_mappings(4)
         # make similar pairs
         for key in adj_mappings:
             for value in adj_mappings[key]:
-                similar_pairs.append([tiles[key-1], tiles[value-1]])
-        
+                similar_pairs.append([tiles[key-1], tiles[value-1], 1])
+
         # make dissimilar pairs
         for key in adj_mappings:
             all_values = [i for i in range(1, 17)]
             key_values = adj_mappings[key] + [key]
             values = list(set(all_values) - set(key_values))
             for value in values:
-                dis_pairs.append([tiles[key-1], tiles[value-1]])
-            
-    df_sim = pd.DataFrame(similar_pairs, columns =['Tile_1', 'Tile_2'])
-    df_dissim = pd.DataFrame(dis_pairs, columns =['Tile_1', 'Tile_2'])
+                dis_pairs.append([tiles[key-1], tiles[value-1], 0])
 
-    return df_sim, df_dissim
-    
+    df_sim = pd.DataFrame(similar_pairs, columns =['Tile_1', 'Tile_2', 'Label'])
+    df_dissim = pd.DataFrame(dis_pairs, columns =['Tile_1', 'Tile_2', 'Label'])
+    df_sim.to_csv("sim_samples.csv", index=False)
+    df_dissim.to_csv("dissim_samples.csv", index=False)
