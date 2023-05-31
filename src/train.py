@@ -1,14 +1,11 @@
 import matplotlib.pyplot as plt
 import os
 from pathlib import Path
-from pydicom.filereader import dcmread
 from itertools import groupby
-import pydicom as dicom
 from PIL import Image
 import csv
 import numpy as np
 from skimage.transform import resize
-from MIBIDataset import MIBIDataset
 
 import torch.optim as optim
 import torch
@@ -33,8 +30,9 @@ net = MIBINet()
 print ("Network setup done")
 criterion = ContrastiveLoss()
 optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
-csv_file = ""
-dataset = MIBIDataset(csv_file)
+sim_csv_file = "sim_samples.csv"
+dissim_csv_file = "dissim_samples.csv"
+dataset = MIBIDataset(sim_csv_file, dissim_csv_file, None)
 trainloader = torch.utils.data.DataLoader(dataset, batch_size=32,shuffle=True)
 
 print ("Starting training")
@@ -42,14 +40,14 @@ for epoch in range(10):  # loop over the dataset multiple times
 
     running_loss = 0.0
     for i, data in enumerate(trainloader, 0):
-        # get the inputs; data is a list of [inputs, labels]
+        # get the inputs; data is a list of [input_1, input_2, label]
         input_1, input_2, labels = data
         labels = torch.unsqueeze(labels, 1)
         # zero the parameter gradients
         optimizer.zero_grad()
-
+        print (input_1.shape)
         # forward + backward + optimize
-        outputs = net(inputs.float())
+        outputs = net(input_1.float(), input_2.float())
         loss = criterion(outputs, labels.float())
         #print (loss)
         loss.backward()
