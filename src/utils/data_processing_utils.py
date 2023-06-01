@@ -93,7 +93,6 @@ def get_tiled_data(n):
 Evaluate accuracy of model
 '''
 def accuracy(predictions, labels):
-    _, predicted = torch.max(predictions, 1)
     correct = (predicted == labels).sum().item()
     total = labels.size(0)
     return correct / total

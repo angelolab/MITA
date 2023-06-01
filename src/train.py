@@ -24,15 +24,15 @@ import glob
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 batch_size = 32
 
-path = "models/"
+path = "~/models/"
 print ("Initializing MIBINet")
 net = MIBINet()
 
 print ("Network setup done")
 criterion = nn.BCELoss()
 optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
-train_dataset = MIBIDataset('train_sim_pairs.npz', 'train_dissim_pairs.npz', None)
-val_dataset = MIBIDataset('eval_sim_pairs.npz', 'eval_dissim_pairs.npz', None)
+train_dataset = MIBIDataset('~/data/train_sim_pairs.npz', '~/data/train_dissim_pairs.npz', None)
+val_dataset = MIBIDataset('~/data/eval_sim_pairs.npz', '~/data/eval_dissim_pairs.npz', None)
 trainloader = torch.utils.data.DataLoader(train_dataset, batch_size=32,shuffle=True)
 valloader = torch.utils.data.DataLoader(val_dataset, batch_size=32,shuffle=True)
 
@@ -81,6 +81,8 @@ for epoch in range(10):  # loop over the dataset multiple times
 
         avg_loss = total_loss / total_samples
         avg_accuracy = total_accuracy / total_samples
+        print ("Average evaluation loss: ", avg_loss)
+        print ("Average evaluation accuracy: ", avg_accuracy)
 
 
 print('Finished Training')
