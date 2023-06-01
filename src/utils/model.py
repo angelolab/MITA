@@ -20,41 +20,30 @@ class MIBINet(nn.Module):
     def __init__(self):
         super(MIBINet, self).__init__()
         # Shared convolutional layers
-        self.cnn1 = nn.Sequential(
-            nn.Conv2d(3, 96, kernel_size=11,stride=4),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(3, stride=2),
-            
-            nn.Conv2d(96, 256, kernel_size=5, stride=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(2, stride=2),
-
-            nn.Conv2d(256, 384, kernel_size=3,stride=1),
-            nn.ReLU(inplace=True)
-        )
-        
-        # Fully connected layers
-        self.fc1 = nn.Sequential(
-            nn.Linear(46464, 1024),
-            nn.ReLU(inplace=True),
-            
-            nn.Linear(1024, 256),
-            nn.ReLU(inplace=True),
-            
-            nn.Linear(256,2)
-        )
+        self.resnet = models.resnet18(pretrained=False)
+        # Remove the last fully connected layer of ResNet-18
+        self.resnet.fc = nn.Identity()
+        # Add a new fully connected layer for classification
+        self.fc = nn.Linear(512, 1)
+        self.sigmoid = nn.Sigmoid()
         
     def forward_once(self, x):
-        output = self.cnn1(x)
-        output = output.view(output.size()[0], -1)
-        output = self.fc1(output)
+        output = self.resnet(x)
         return output
 
     def forward(self, input1, input2):
-        output1 = self.forward_once(input1)
-        output2 = self.forward_once(input2)
+        # Pass the inputs through the ResNet-18 backbone
+        out1 = self.forward_once(input1)
+        out2 = self.forward_once(input2)
+        
+        # Concatenate the embeddings
+        combined = torch.cat((out1, out2), dim=1)
+        
+        # Pass the combined embeddings through the classification layer
+        output = self.fc(combined)
+        output = self.sigmoid(output)
 
-        return output1, output2
+        return output
 
 class ContrastiveLoss(nn.Module):
     def __init__(self, margin=2.0):

@@ -103,3 +103,13 @@ def get_tiled_data(n):
                 dis_pairs.append([tiles[key-1], tiles[value-1]])
     np.savez_compressed('sim_pairs.npz', *similar_pairs)
     np.savez_compressed('dissim_pairs.npz', *dis_pairs)
+
+
+    '''
+    Evaluate accuracy of model
+    '''
+    def accuracy(predictions, labels):
+        _, predicted = torch.max(predictions, 1)
+        correct = (predicted == labels).sum().item()
+        total = labels.size(0)
+        return correct / total
