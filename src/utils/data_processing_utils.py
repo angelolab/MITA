@@ -104,5 +104,5 @@ def get_tiled_data(n):
 
     df_sim = pd.DataFrame(similar_pairs, columns =['Tile_1', 'Tile_2', 'Label'])
     df_dissim = pd.DataFrame(dis_pairs, columns =['Tile_1', 'Tile_2', 'Label'])
-    df_sim.to_csv("sim_samples.csv", index=False)
-    df_dissim.to_csv("dissim_samples.csv", index=False)
+
+    return df_sim, df_dissim

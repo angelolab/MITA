@@ -16,11 +16,12 @@ import torch.nn.functional as F
 
 
 class MIBINet(nn.Module):
+
     def __init__(self):
         super(MIBINet, self).__init__()
         # Shared convolutional layers
         self.cnn1 = nn.Sequential(
-            nn.Conv2d(1, 96, kernel_size=11,stride=4),
+            nn.Conv2d(3, 96, kernel_size=11,stride=4),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(3, stride=2),
             
@@ -34,7 +35,7 @@ class MIBINet(nn.Module):
         
         # Fully connected layers
         self.fc1 = nn.Sequential(
-            nn.Linear(384, 1024),
+            nn.Linear(46464, 1024),
             nn.ReLU(inplace=True),
             
             nn.Linear(1024, 256),

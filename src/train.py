@@ -30,9 +30,7 @@ net = MIBINet()
 print ("Network setup done")
 criterion = ContrastiveLoss()
 optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
-sim_csv_file = "sim_samples.csv"
-dissim_csv_file = "dissim_samples.csv"
-dataset = MIBIDataset(sim_csv_file, dissim_csv_file, None)
+dataset = MIBIDataset(df_sim, df_dissim, None)
 trainloader = torch.utils.data.DataLoader(dataset, batch_size=32,shuffle=True)
 
 print ("Starting training")
@@ -45,11 +43,10 @@ for epoch in range(10):  # loop over the dataset multiple times
         labels = torch.unsqueeze(labels, 1)
         # zero the parameter gradients
         optimizer.zero_grad()
-        print (input_1.shape)
         # forward + backward + optimize
-        outputs = net(input_1.float(), input_2.float())
-        loss = criterion(outputs, labels.float())
-        #print (loss)
+        output1, output2 = net(input_1.float(), input_2.float())
+        loss = criterion(output1.float(), output2.float(), labels.float())
+        print (loss)
         loss.backward()
         optimizer.step()
 
@@ -57,7 +54,7 @@ for epoch in range(10):  # loop over the dataset multiple times
         running_loss += loss.item()
         if i % 5 == 4:    
             print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 5:.3f}')
-            torch.save(net.state_dict(), path)
+            #torch.save(net.state_dict(), path)
             running_loss = 0.0
 
 print('Finished Training')
