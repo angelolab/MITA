@@ -61,7 +61,7 @@ def get_tiled_data(n):
     dis_pairs = []
     fov = ["TIFs"]
     three_channels = ['159_NEFH','169_Iba1','174_GFAP']
-    three_channel_norm = channel_norm[['159_NEFH.tif','169_Iba1.tif','174_GFAP.tif']]
+    #three_channel_norm = channel_norm[['159_NEFH.tif','169_Iba1.tif','174_GFAP.tif']]
     for directory in directories:
         path = "Noise_rm_2/"+directory+"/"
         img_xr = load_utils.load_imgs_from_tree(Path(path), fovs=["TIFs"])
@@ -92,7 +92,7 @@ def get_tiled_data(n):
         # make similar pairs
         for key in adj_mappings:
             for value in adj_mappings[key]:
-                similar_pairs.append([tiles[key-1], tiles[value-1], 1])
+                similar_pairs.append([tiles[key-1], tiles[value-1]])
 
         # make dissimilar pairs
         for key in adj_mappings:
@@ -100,9 +100,6 @@ def get_tiled_data(n):
             key_values = adj_mappings[key] + [key]
             values = list(set(all_values) - set(key_values))
             for value in values:
-                dis_pairs.append([tiles[key-1], tiles[value-1], 0])
-
-    df_sim = pd.DataFrame(similar_pairs, columns =['Tile_1', 'Tile_2', 'Label'])
-    df_dissim = pd.DataFrame(dis_pairs, columns =['Tile_1', 'Tile_2', 'Label'])
-
-    return df_sim, df_dissim
+                dis_pairs.append([tiles[key-1], tiles[value-1]])
+    np.savez_compressed('sim_pairs.npz', *similar_pairs)
+    np.savez_compressed('dissim_pairs.npz', *dis_pairs)

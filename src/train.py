@@ -30,6 +30,8 @@ net = MIBINet()
 print ("Network setup done")
 criterion = ContrastiveLoss()
 optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+df_sim, df_dissim = get_tiled_data(4)
+
 dataset = MIBIDataset(df_sim, df_dissim, None)
 trainloader = torch.utils.data.DataLoader(dataset, batch_size=32,shuffle=True)
 
