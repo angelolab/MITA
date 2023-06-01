@@ -21,40 +21,6 @@ def get_directories(path):
             directories.append(entry.name)
     return directories
 
-'''
-Function to get all files in a given path
-'''
-def get_files(path):
-    files = []
-    for entry in os.scandir(path):
-        if entry.is_file():
-            files.append(entry.name)
-    return files
-
-'''
-Function to get adjacent tile numbers in a given image
-'''
-def get_mappings(n):
-    tiles = n * n
-    adj_mappings = {}
-    for i in range(1, tiles+1):
-        values = []
-        if (i % n != 0):
-            values.append(i+1)
-        if (i - n > 0):
-            values.append(i - 4)
-        if (i + n <= tiles):
-            values.append(i + 4)
-        if ((i - 1) % n != 0):
-            values.append(i-1)
-        adj_mappings[i] = values
-    return adj_mappings
-
-
-'''
-Function to get tiled data for three channels --  NEFH, Iba1, GFAP
-Creates similar and dissimilar pairs and returns two dataframes -- one for sim and one for dissim
-'''
 def get_tiled_data(n):
     final_images = []
     similar_pairs = []
@@ -101,15 +67,33 @@ def get_tiled_data(n):
             values = list(set(all_values) - set(key_values))
             for value in values:
                 dis_pairs.append([tiles[key-1], tiles[value-1]])
-    np.savez_compressed('sim_pairs.npz', *similar_pairs)
-    np.savez_compressed('dissim_pairs.npz', *dis_pairs)
+    
+    random.shuffle(similar_pairs)
+    random.shuffle(dis_pairs)
+    
+    train_sim = similar_pairs[:3500]
+    train_dissim = dis_pairs[:3500]
+    
+    eval_sim = similar_pairs[3500:4500]
+    eval_dissim = dis_pairs[3500:4500]
+    
+    test_sim = similar_pairs[4500:]
+    test_dissim = dis_pairs[4500:5088]
+    
+    
+    np.savez_compressed('train_sim_pairs.npz', *train_sim)
+    np.savez_compressed('train_dissim_pairs.npz', *train_dissim)
+    np.savez_compressed('eval_sim_pairs.npz', *eval_sim)
+    np.savez_compressed('eval_dissim_pairs.npz', *eval_dissim)
+    np.savez_compressed('test_sim_pairs.npz', *test_sim)
+    np.savez_compressed('test_dissim_pairs.npz', *test_dissim)
 
 
-    '''
-    Evaluate accuracy of model
-    '''
-    def accuracy(predictions, labels):
-        _, predicted = torch.max(predictions, 1)
-        correct = (predicted == labels).sum().item()
-        total = labels.size(0)
-        return correct / total
+'''
+Evaluate accuracy of model
+'''
+def accuracy(predictions, labels):
+    _, predicted = torch.max(predictions, 1)
+    correct = (predicted == labels).sum().item()
+    total = labels.size(0)
+    return correct / total
