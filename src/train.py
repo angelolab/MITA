@@ -7,6 +7,7 @@ import csv
 import numpy as np
 from skimage.transform import resize
 from utils.data_processing_utils import *
+from utils.model import *
 import torch.optim as optim
 import torch
 import torchvision.models as models
@@ -20,47 +21,54 @@ import matplotlib.pyplot as plt
 import torch.nn as nn
 import torch.nn.functional as F
 import glob
-
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+from MIBIDataset import MIBIDataset
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 batch_size = 32
 
-path = "~/models/"
 print ("Initializing MIBINet")
 net = MIBINet()
+net = net.to(device)
+
+
 
 print ("Network setup done")
 criterion = nn.BCELoss()
 optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
-train_dataset = MIBIDataset('~/data/train_sim_pairs.npz', '~/data/train_dissim_pairs.npz', None)
-val_dataset = MIBIDataset('~/data/eval_sim_pairs.npz', '~/data/eval_dissim_pairs.npz', None)
+train_dataset = MIBIDataset('/home/sarthak/MITAproj/src/data/train_sim_pairs.npz', '/home/sarthak/MITAproj/src/data/train_dissim_pairs.npz', None)
+val_dataset = MIBIDataset('/home/sarthak/MITAproj/src/data/eval_sim_pairs.npz', '/home/sarthak/MITAproj/src/data/eval_dissim_pairs.npz', None)
 trainloader = torch.utils.data.DataLoader(train_dataset, batch_size=32,shuffle=True)
 valloader = torch.utils.data.DataLoader(val_dataset, batch_size=32,shuffle=True)
 
 print ("Starting training")
 for epoch in range(10):  # loop over the dataset multiple times
-    model.train()
+    net.train()
     running_loss = 0.0
     for i, data in enumerate(trainloader, 0):
         # get the inputs; data is a list of [input_1, input_2, label]
         input_1, input_2, labels = data
         labels = torch.unsqueeze(labels, 1)
+        labels = labels.to(device)
+        input_1 = input_1.to(device)
+        input_2 = input_2.to(device)
+
         # zero the parameter gradients
         optimizer.zero_grad()
         # forward + backward + optimize
         output = net(input_1.float(), input_2.float())
+        output = output.to(device)
         loss = criterion(output.float(), labels.float())
-        print (loss)
         loss.backward()
         optimizer.step()
 
         # print statistics
         running_loss += loss.item()
-        if i % 5 == 4:    
+        if i % 199 == 0:    
             print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 5:.3f}')
+            path = "/home/sarthak/MITAproj/src/models/" + "ckpt_" + str(epoch) + ".pt"
             torch.save(net.state_dict(), path)
             running_loss = 0.0
     
-    model.eval()
+    net.eval()
     with torch.no_grad():
         total_loss = 0.0
         total_accuracy = 0.0
@@ -69,9 +77,13 @@ for epoch in range(10):  # loop over the dataset multiple times
         for i, data in enumerate(valloader, 0):
             input_1, input_2, labels = data
             labels = torch.unsqueeze(labels, 1)
+            labels = labels.to(device)
+            input_1 = input_1.to(device)
+            input_2 = input_2.to(device)
 
             # Forward pass
             output = net(input_1.float(), input_2.float())
+            output = output.to(device)
             loss = criterion(output.float(), labels.float())
 
             # Compute evaluation metrics

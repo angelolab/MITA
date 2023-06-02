@@ -1,7 +1,7 @@
 from utils import *
 import torch
 from torch.utils.data import Dataset
-
+import numpy as np
 class MIBIDataset(Dataset):
     def __init__(self, sim_df=None, dissim_df=None, transform=None):
         self.sim_df = np.load(sim_df)

@@ -3,8 +3,8 @@
 from skimage import io
 from matplotlib import pyplot as plt
 import numpy as np
-from pixie_preprocessing import *
-from pixie_cluster_utils import *
+#from pixie_preprocessing import *
+#from pixie_cluster_utils import *
 from PIL import Image
 from numpy import asarray
 import os
@@ -93,6 +93,13 @@ def get_tiled_data(n):
 Evaluate accuracy of model
 '''
 def accuracy(predictions, labels):
-    correct = (predicted == labels).sum().item()
+    binary_predictions = (predictions >= 0.5).float()
+
+    # Compare binary predictions with true labels
+    correct = (binary_predictions == labels).sum().item()
     total = labels.size(0)
-    return correct / total
+
+    # Compute accuracy
+    accuracy = correct / total
+
+    return accuracy

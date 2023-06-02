@@ -5,6 +5,7 @@ from PIL import Image
 import PIL.ImageOps
 import torchvision
 import torchvision.datasets as datasets
+import torchvision.models as models
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, Dataset
 import torchvision.utils
@@ -13,7 +14,6 @@ from torch.autograd import Variable
 import torch.nn as nn
 from torch import optim
 import torch.nn.functional as F
-
 
 class MIBINet(nn.Module):
 
@@ -24,7 +24,7 @@ class MIBINet(nn.Module):
         # Remove the last fully connected layer of ResNet-18
         self.resnet.fc = nn.Identity()
         # Add a new fully connected layer for classification
-        self.fc = nn.Linear(512, 1)
+        self.fc = nn.Linear(1024, 1)
         self.sigmoid = nn.Sigmoid()
         
     def forward_once(self, x):
