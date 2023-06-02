@@ -34,8 +34,8 @@ net = net.to(device)
 print ("Network setup done")
 criterion = nn.BCELoss()
 optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
-train_dataset = MIBIDataset('/home/sarthak/MITAproj/src/data/train_sim_pairs.npz', '/home/sarthak/MITAproj/src/data/train_dissim_pairs.npz', None)
-val_dataset = MIBIDataset('/home/sarthak/MITAproj/src/data/eval_sim_pairs.npz', '/home/sarthak/MITAproj/src/data/eval_dissim_pairs.npz', None)
+train_dataset = MIBIDataset('~/src/data/train_sim_pairs.npz', '~/src/data/train_dissim_pairs.npz', None)
+val_dataset = MIBIDataset('~/src/data/eval_sim_pairs.npz', '~/src/data/eval_dissim_pairs.npz', None)
 trainloader = torch.utils.data.DataLoader(train_dataset, batch_size=32,shuffle=True)
 valloader = torch.utils.data.DataLoader(val_dataset, batch_size=32,shuffle=True)
 
@@ -64,7 +64,7 @@ for epoch in range(10):  # loop over the dataset multiple times
         running_loss += loss.item()
         if i % 199 == 0:    
             print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 5:.3f}')
-            path = "/home/sarthak/MITAproj/src/models/" + "ckpt_" + str(epoch) + ".pt"
+        path = "~/src/models/" + "ckpt_" + str(epoch) + ".pt"
             torch.save(net.state_dict(), path)
             running_loss = 0.0
     
