@@ -24,7 +24,7 @@ class MIBINet(nn.Module):
         # Remove the last fully connected layer of ResNet-18
         self.resnet.fc = nn.Identity()
         # Add a new fully connected layer for classification
-        self.fc = nn.Linear(1024, 1)
+        self.fc = nn.Linear(512, 1)
         self.sigmoid = nn.Sigmoid()
         
     def forward_once(self, x):
@@ -37,7 +37,7 @@ class MIBINet(nn.Module):
         out2 = self.forward_once(input2)
         
         # Concatenate the embeddings
-        combined = torch.cat((out1, out2), dim=1)
+        combined = torch.abs(out1 - out2)
         
         # Pass the combined embeddings through the classification layer
         output = self.fc(combined)
